@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Heart } from "lucide-react";
 
 export default function LoadingScreen({
   onComplete,
@@ -77,7 +78,7 @@ export default function LoadingScreen({
                   fontFamily: "'Cormorant Garamond', serif",
                 }}
               >
-                S ♥ S
+                S <Heart size={18} className="text-[#D4AF37]" fill="currentColor" /> S
               </h1>
             </div>
           </motion.div>
