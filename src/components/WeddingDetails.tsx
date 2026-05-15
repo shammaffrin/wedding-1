@@ -24,7 +24,7 @@ export default function WeddingDetails() {
     canvas.width = 320;
     canvas.height = 180;
 
-    // Gold scratch layer
+    // Draw scratch layer
     ctx.fillStyle = "#D4AF37";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -38,14 +38,14 @@ export default function WeddingDetails() {
     const scratch = (x: number, y: number) => {
       ctx.globalCompositeOperation = "destination-out";
       ctx.beginPath();
-      ctx.arc(x, y, 20, 0, Math.PI * 2);
+      ctx.arc(x, y, 22, 0, Math.PI * 2);
       ctx.fill();
     };
 
     const getPos = (e: MouseEvent | TouchEvent) => {
       const rect = canvas.getBoundingClientRect();
 
-      if ("touches" in e) {
+      if ("touches" in e && e.touches[0]) {
         return {
           x: e.touches[0].clientX - rect.left,
           y: e.touches[0].clientY - rect.top,
@@ -53,12 +53,23 @@ export default function WeddingDetails() {
       }
 
       return {
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top,
+        x: (e as MouseEvent).clientX - rect.left,
+        y: (e as MouseEvent).clientY - rect.top,
       };
     };
 
-    const start = () => (scratching = true);
+    const start = (e: any) => {
+      e.preventDefault?.();
+      scratching = true;
+    };
+
+    const move = (e: any) => {
+      if (!scratching) return;
+      e.preventDefault?.();
+      const pos = getPos(e);
+      scratch(pos.x, pos.y);
+    };
+
     const end = () => {
       scratching = false;
 
@@ -82,107 +93,107 @@ export default function WeddingDetails() {
         setRevealed(true);
 
         confetti({
-  particleCount: 220,
-  spread: 100,
-  origin: { y: 0.6 },
-  colors: [
-    "#D4AF37", // gold
-    "#FFD700", // bright gold
-    "#E6BE8A", // champagne gold
-    "#C5A977", // muted gold
-    "#F8E7A1", // soft shimmer
-  ],
-});
+          particleCount: 220,
+          spread: 100,
+          origin: { y: 0.6 },
+          colors: [
+            "#D4AF37",
+            "#FFD700",
+            "#E6BE8A",
+            "#C5A977",
+            "#F8E7A1",
+          ],
+        });
       }
     };
 
-    const move = (e: MouseEvent | TouchEvent) => {
-      if (!scratching) return;
-      const pos = getPos(e);
-      scratch(pos.x, pos.y);
+    // Mouse events
+    canvas.addEventListener("mousedown", start);
+    canvas.addEventListener("mousemove", move);
+    canvas.addEventListener("mouseup", end);
+
+    // Touch events (IMPORTANT FIX)
+    canvas.addEventListener("touchstart", start, { passive: false });
+    canvas.addEventListener("touchmove", move, { passive: false });
+    canvas.addEventListener("touchend", end);
+
+    // Prevent page scroll while scratching
+    const preventScroll = (e: TouchEvent) => {
+      if (scratching) e.preventDefault();
     };
 
-    canvas.addEventListener("mousedown", start);
-    canvas.addEventListener("mouseup", end);
-    canvas.addEventListener("mousemove", move);
-
-    canvas.addEventListener("touchstart", start);
-    canvas.addEventListener("touchend", end);
-    canvas.addEventListener("touchmove", move);
+    document.addEventListener("touchmove", preventScroll, {
+      passive: false,
+    });
 
     return () => {
       canvas.removeEventListener("mousedown", start);
-      canvas.removeEventListener("mouseup", end);
       canvas.removeEventListener("mousemove", move);
+      canvas.removeEventListener("mouseup", end);
 
       canvas.removeEventListener("touchstart", start);
-      canvas.removeEventListener("touchend", end);
       canvas.removeEventListener("touchmove", move);
+      canvas.removeEventListener("touchend", end);
+
+      document.removeEventListener("touchmove", preventScroll);
     };
   }, [revealed]);
 
- return (
-  <section
-    ref={sectionRef}
-    className="relative py-24 text-center overflow-hidden bg-black"
-  >
-    {/* Background image layer */}
+  return (
+    <section
+      ref={sectionRef}
+      className="relative py-24 text-center overflow-hidden bg-black"
+    >
+      <div className="absolute inset-0 bg-black/70" />
 
-    {/* Dark overlay for readability */}
-    <div className="absolute inset-0 bg-black/70" />
+      <div className="relative z-10 max-w-4xl mx-auto px-6">
+        <h2 className="text-5xl text-[#D4AF37] mb-10">
+          Save The Date
+        </h2>
 
-    <div className="relative z-10 max-w-4xl mx-auto px-6">
-      <h2 className="text-5xl text-[#D4AF37] mb-10">
-        Save The Date
-      </h2>
+        {/* Scratch Card */}
+        <div className="relative w-[320px] h-[180px] mx-auto mb-20">
+          <div className="absolute inset-0 bg-[#111] opacity-80 rounded-xl border border-[#D4AF37]/20" />
 
-      {/* Scratch Card */}
-      <div className="relative w-[320px] h-[180px] mx-auto mb-20">
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <h2 className="text-6xl text-[#D4AF37]">15</h2>
+            <p className="text-3xl text-[#E8D8B8] mt-2">
+              June 2026
+            </p>
+          </div>
 
-  {/* Background layer only */}
-  <div className="absolute inset-0 bg-[#111] opacity-80 rounded-xl border border-[#D4AF37]/20" />
+          {!revealed && (
+            <canvas
+              ref={canvasRef}
+              className="absolute inset-0 rounded-xl cursor-pointer touch-none"
+            />
+          )}
+        </div>
 
-  {/* Content layer (always fully visible) */}
-  <div className="absolute inset-0 flex flex-col items-center justify-center">
-    <h2 className="text-6xl text-[#D4AF37]">15</h2>
-    <p className="text-3xl text-[#E8D8B8] mt-2">
-      June 2026
-    </p>
-  </div>
+        {/* Details */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+        >
+          <h3 className="text-4xl text-[#D4AF37] mb-8">
+            Nikah & Reception
+          </h3>
 
-  {/* Scratch layer */}
-  {!revealed && (
-    <canvas
-      ref={canvasRef}
-      className="absolute inset-0 rounded-xl cursor-pointer"
-    />
-  )}
-</div>
+          <Clock className="mx-auto text-[#D4AF37] mb-4" />
 
-      {/* Wedding details */}
-      <motion.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={isInView ? { opacity: 1, y: 0 } : {}}
-      >
-        <h3 className="text-4xl text-[#D4AF37] mb-8">
-          Nikah & Reception
-        </h3>
+          <p className="text-2xl text-white">
+            Nikah at 11:00 AM
+          </p>
 
-        <Clock className="mx-auto text-[#D4AF37] mb-4" />
+          <p className="text-lg text-[#C5A977] mt-2 italic">
+            Reception follows until 2:00 PM
+          </p>
 
-        <p className="text-2xl text-white">
-          Nikah at 11:00 AM
-        </p>
-
-        <p className="text-lg text-[#C5A977] mt-2 italic">
-          Reception follows until 2:00 PM
-        </p>
-
-        <p className="mt-6 text-white">
-          Venue details below
-        </p>
-      </motion.div>
-    </div>
-  </section>
-);
+          <p className="mt-6 text-white">
+            Venue details below
+          </p>
+        </motion.div>
+      </div>
+    </section>
+  );
 }
