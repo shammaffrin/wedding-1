@@ -73,13 +73,15 @@ export default function LoadingScreen({
               />
 
               <h1
-                className="text-4xl text-[#D4AF37]"
-                style={{
-                  fontFamily: "'Cormorant Garamond', serif",
-                }}
-              >
-                S <Heart size={18} className="text-[#D4AF37]" fill="currentColor" /> S
-              </h1>
+  className="text-4xl text-[#D4AF37] flex items-center justify-center gap-3"
+  style={{
+    fontFamily: "'Cormorant Garamond', serif",
+  }}
+>
+  S
+  <Heart size={18} className="text-[#D4AF37]" fill="currentColor" />
+  S
+</h1>
             </div>
           </motion.div>
 
