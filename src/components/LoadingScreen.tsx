@@ -79,7 +79,7 @@ export default function LoadingScreen({
   }}
 >
   S
-  <Heart size={18} className="text-[#D4AF37]" fill="currentColor" />
+  <Heart size={20} className="text-[#D4AF37]" fill="currentColor" />
   S
 </h1>
             </div>
